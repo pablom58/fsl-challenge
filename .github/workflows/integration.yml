@@ -1,0 +1,136 @@
+name: 'Integration Flow'
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'App Env'
+        required: false
+        type: string
+        default: devel
+      working_directory:
+        description: 'App Path'
+        required: false
+        type: string
+        default: codebase/rdicidr-0.1.0
+
+jobs:
+  dependencies:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ${{ inputs.working_directory }}/.nvmrc
+
+      - name: Install dependencies
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          npm install
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ inputs.working_directory }}/node_modules
+          key: ${{ github.sha }}
+
+  run-lint:
+    runs-on: ubuntu-latest
+    needs: [dependencies]
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ${{ inputs.working_directory }}/.nvmrc
+
+      - name: Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ inputs.working_directory }}/node_modules
+          key: ${{ github.sha }}
+
+      - name: Run Lint
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          npm run lint
+
+  run-prettier:
+    runs-on: ubuntu-latest
+    needs: [dependencies]
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ${{ inputs.working_directory }}/.nvmrc
+
+      - name: Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ inputs.working_directory }}/node_modules
+          key: ${{ github.sha }}
+
+      - name: Run Prettier
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          npm run prettier
+
+  run-tests:
+    runs-on: ubuntu-latest
+    needs: [dependencies]
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ${{ inputs.working_directory }}/.nvmrc
+
+      - name: Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ inputs.working_directory }}/node_modules
+          key: ${{ github.sha }}
+
+      - name: Run Test
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          CI=true npm run test
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [dependencies, run-lint, run-prettier, run-tests]
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ${{ inputs.working_directory }}/.nvmrc
+
+      - name: Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ inputs.working_directory }}/node_modules
+          key: ${{ github.sha }}
+
+      - name: Run Build
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          npm run build
+

@@ -1,0 +1,10 @@
+name: 'Pull Requests Flow'
+
+on:
+  pull_request:
+    branches: [prod, stage, devel]
+
+jobs:
+  integration:
+    uses: ./.github/workflows/integration.yml
+    secrets: inherit
