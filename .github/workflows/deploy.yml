@@ -1,0 +1,46 @@
+name: 'Deploy Flow'
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'App Env'
+        required: false
+        type: string
+        default: devel
+      working_directory:
+        description: 'App Path'
+        required: false
+        type: string
+        default: codebase/rdicidr-0.1.0
+
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_TF_ROLE }}
+          aws-region: us-east-1
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifact-${{ inputs.environment }}
+          path: ${{ inputs.working_directory }}/build
+
+      - name: Deploy React App
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          aws s3 sync ./build s3://fsl-challenge-bucket
+      
