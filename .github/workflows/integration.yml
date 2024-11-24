@@ -134,3 +134,12 @@ jobs:
         run: |
           npm run build
 
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact-${{ inputs.environment }}
+          include-hidden-files: true
+          path: |
+            ${{ inputs.working_directory }}/build
+          
+

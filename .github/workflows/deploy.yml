@@ -1,4 +1,4 @@
-name: 'Tf Apply Flow'
+name: 'Deploy Flow'
 
 on:
   workflow_call:
@@ -12,7 +12,7 @@ on:
         description: 'App Path'
         required: false
         type: string
-        default: infrastructure/aws
+        default: codebase/rdicidr-0.1.0
 
 
 permissions:
@@ -20,7 +20,7 @@ permissions:
   contents: read
 
 jobs:
-  tf-apply:
+  deploy:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
@@ -33,16 +33,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifact-${{ inputs.environment }}
+          path: ${{ inputs.working_directory }}/build
 
-      - name: TF init
+      - name: Deploy React App
         working-directory: ${{ inputs.working_directory }}
         run: |
-          terraform init
-
-      - name: TF Apply
-        working-directory: ${{ inputs.working_directory }}
-        run: |
-          terraform apply --auto-approve
+          aws s3 sync ./build s3://fsl-challenge-bucket
       

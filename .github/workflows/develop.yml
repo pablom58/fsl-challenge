@@ -20,5 +20,10 @@ jobs:
 
   tf-apply:
     needs: [ integration, tf-plan ]
-    uses: ./.github/workflows/tf-plan.yml
+    uses: ./.github/workflows/tf-apply.yml
+    secrets: inherit
+
+  deploy:
+    needs: [ integration, tf-plan, tf-apply ]
+    uses: ./.github/workflows/deploy.yml
     secrets: inherit
