@@ -9,21 +9,26 @@ permissions:
   contents: read
 
 jobs:
-  integration:
-    uses: ./.github/workflows/integration.yml
-    secrets: inherit
+#  integration:
+#    uses: ./.github/workflows/integration.yml
+#    secrets: inherit
+#
+#  tf-plan:
+#    needs: [integration]
+#    uses: ./.github/workflows/tf-plan.yml
+#    secrets: inherit
+#
+#  tf-apply:
+#    needs: [ integration, tf-plan ]
+#    uses: ./.github/workflows/tf-apply.yml
+#    secrets: inherit
+#
+#  deploy:
+#    needs: [ integration, tf-plan, tf-apply ]
+#    uses: ./.github/workflows/deploy.yml
+#    secrets: inherit
 
-  tf-plan:
-    needs: [integration]
-    uses: ./.github/workflows/tf-plan.yml
-    secrets: inherit
-
-  tf-apply:
+  tf-destroy:
     needs: [ integration, tf-plan ]
-    uses: ./.github/workflows/tf-apply.yml
-    secrets: inherit
-
-  deploy:
-    needs: [ integration, tf-plan, tf-apply ]
-    uses: ./.github/workflows/deploy.yml
+    uses: ./.github/workflows/tf-destroy.yml
     secrets: inherit
