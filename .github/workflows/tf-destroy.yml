@@ -1,0 +1,48 @@
+name: 'Tf Destroy Flow'
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'App Env'
+        required: false
+        type: string
+        default: devel
+      working_directory:
+        description: 'App Path'
+        required: false
+        type: string
+        default: infrastructure/aws
+
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  tf-apply:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_TF_ROLE }}
+          aws-region: us-east-1
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: TF init
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          terraform init
+
+      - name: TF Destroy
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          terraform destroy --auto-approve
+      
