@@ -29,6 +29,5 @@ jobs:
 #    secrets: inherit
 
   tf-destroy:
-    needs: [ integration, tf-plan ]
     uses: ./.github/workflows/tf-destroy.yml
     secrets: inherit
